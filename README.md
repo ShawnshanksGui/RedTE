@@ -1,59 +1,60 @@
+```markdown
 # RedTE
 A MARL-based distributed traffic engineering system
 
+# Environment Setup
 
-# 环境准备
+## Topology Selection
+Choose topologies: GEANT (23, 36) and Abi (12, 15).
+How to choose:
+When changing the topology, simply modify the `${topoName}` in the training (train.sh) and inference (valid.sh) scripts.
 
-查看requirements.txt
+# Training
 
-选择拓扑： GEANT（23，36） 和 Abi(12, 15);
-如何选择：
-当更换拓扑时，只需要修改训练（train.sh）和推理(valid.sh)脚本的${topoName} 即可。
+## Batch Execution
 
+Run the command:
+```bash
+bash train.sh  # (train.sh will loop call run_train.sh)
+```
 
+1) Run in the background.
 
-# 训练
+2) Log information from the run is stored in `../train_abi_log/`.
 
-## 批量运行
+3) Intermediate training results (performance ratio) are saved in the folder `../log/log/hyper1-hyper2-hyper3..-hyperx`, controlled by the `--stamp_type` parameter in run_train.sh.
 
-bash train.sh  （train.sh会循环调用run_train.sh）
+# Inference
 
-1）后台运行
+## Batch Execution
 
-2）运行的log信息存储在../train_abi_log/中
+Run the command:
+```bash
+bash valid.sh  # (valid.sh will continuously loop run_valid.sh)
+```
 
-3）训练的中间结果（performance ratio）保存在 ```../log/log/hyper1-hyper2-hyper3..-hyperx``` 文件夹中, 由run_train.sh的--stamp_type参数控制
+In addition to the parameters used in training, an extra parameter `ckpt_idx` will be introduced to traverse all checkpoints for each set of parameters.
 
+Test performance results are saved in `../DRLTE/log/validRes/`, controlled by the `--stamp_type` parameter in run_test.sh.
 
+Additionally, `test_epoch=1` and `test_episode=500` are used to control the total number of inference test steps.
 
-# 推理
+# Input File Descriptions
 
-## 批量运行
+All input files are located in `DRLTE/inputs/`.
 
-bash valid.sh (valid.sh会不断循环run_valid.sh)
+* File One: 
+  `\${topoName}\_pf\_trueTM\_train4000.txt`: Records the optimal solution (maximum link utilization) obtained from linear programming. This value is used as the denominator for calculating the reward. `topoName` indicates the topology name, stored under the current `topoName`.
+  This file needs to be specified in the run script: `lpPerformFile=../inputs/\${topoName}\_pf\_train4000.txt`.
 
-除了上述训练中所用到的参数，还会引入一个参数，ckpt_idx来遍历每组参数的所有ckpoint。
+* File Two:
+  `\${topoName}\_train4000`: Records candidate paths and traffic matrices. The `topoName` indicates the topology name, stored under the current `topoName`. 
+  This file also needs to be specified in the run script: `file_name=\${topoName}\_train4000`.
 
-test性能结果保存在../DRLTE/log/validRes/， 由run_test.sh的--stamp_type参数控制.
+* File Three: Topology file. 
+  This needs to be specified in the run script: `topoName=GEA`.
 
-另外，test_epoch=1, test_episode=500 用来控制总的推理test的步数。
+# TBD
+there are some codes which are lost in this version of RedTE, which latter maybe uploaded if founded.
 
-
-# input 文件介绍
-
-输入文件都在DRLTE/inputs/中
-
-* 文件一： 
-  \${topoName}\_pf\_trueTM\_train4000.txt: 记录用线性规划求解得到的最优解（最大链路利用率）。 此值被用作计算reward的分母。 topoName指示拓扑名字，存储在当前topoName下，
-  该文件需要在运行脚本中指定: lpPerformFile=../inputs/\${topoName}\_pf\_train4000.txt
-
-* 文件二：
-  \${topoName}\_train4000，记录候选路径和流量矩阵。 其中topoName指示拓扑名字，存储在当前topoName下，
-  该文件也需要在运行脚本中指定:
-  file_name=\${topoName}\_train4000
-
-* 文件三： 拓扑文件 
-  需要在运行脚本中指定：topoName=GEA
-
-
-  
+```
